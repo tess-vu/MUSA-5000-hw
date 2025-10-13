@@ -1,19 +1,24 @@
 ---
-title: "MUSA 5000 Homework I"
-author: "Tess Vu, Jun Luu, Alex Stauffer"
+title: "Homework 1: Using OLS Regression to Predict Median House Values in Philadelphia"
+author: "Alex Stauffer, Jun Luu, Tess Vu"
 date: today
 output: html_document
 ---
 
-# 1. Introduction
+# 1. INTRODUCTION
+
+-   **INSTRUCTIONS:** State the problem and the setting of the analysis (i.e., Philadelphia).
+-   **INSTRUCTIONS:** Present either a brief review of the literature (use Google Scholar) or simply speculate as to why the predictors we’re using might be related with the response variable.
 
 The task is to explore the relationship between median house values and various neighborhood characteristics using Philadelphia data at the Census block group level. (Literature review on impact predictors have on response variable)
 
 ------------------------------------------------------------------------
 
-# 2. Methods
+# 2. METHODS
 
 ## Data Cleaning
+
+-   **INSTRUCTIONS:** Simply state that the original dataset had 1816 observations (i.e., block groups) and was cleaned in order to achieve a dataset with 1720 observations (that is, basically include the information about data cleaning that is on the very the first page of this assignment).
 
 The original Philadelphia block group data set had 1,816 observations. The data was cleaned by removing the following block groups:
 
@@ -28,6 +33,10 @@ The final data set that was tested consists of 1,720 block groups.
 
 ## Exploratory Data Analysis
 
+-   **INSTRUCTIONS:** State that you will examine the summary statistics and distributions of variables.
+-   **INSTRUCTIONS:** Also state that as part of your exploratory data analysis, you will examine the correlations between the predictors.
+    -   Explain what a correlation is, and provide the formula for the sample correlation coefficient r. Also mention the possible range of r values, and what correlation of 0 means
+
 Our purpose is to examine the summary statistics and distributions of variables. As part of our exploratory data analysis, the correlations between the predictors are examined as well.
 
 A correlation coefficient is a statistical measure that quantifies the strength and direction of the relationship between two variables. It is calculated as the sum of the products of each observation’s deviation from the mean of variable x and the mean of variable y, divided by the product of the standard deviations of both variables.
@@ -38,37 +47,46 @@ $$ *r* can take on ranges from -1 to 1, and r = 0 meaning there is no linear rel
 
 ## Multiple Regression Analysis
 
-(Explain what regression does; write the model equation below with your variable names.)
+-   **INSTRUCTIONS:** Describe the method of regression in several sentences. I.e., what is it used for, what does it do?
+-   **INSTRUCTIONS:** State the equation for y for this problem.
+    -   In your report, instead of y and x1…xk, fill in the actual variable names (as in the regression example given above). Be sure to mention what βi’s and ε are as well. If the variables are log transformed, be sure to indicate that in the formulas.
+-   **INSTRUCTIONS:** State and explain regression assumptions (e.g., linearity; independence of observations; normality of residuals; homoscedasticity; no multicollinearity).
+-   **INSTRUCTIONS:** Mention the parameters that need to be estimated in multiple regression (σ2, β0 ,…, βk). State what σ2 is.
+-   **INSTRUCTIONS:** Talk about the way of estimating the parameters. (Hint: present the equation on the slide ‘β Coefficient Estimation – Least Squares’ for multiple regression and briefly discuss what the equation does).
+-   **INSTRUCTIONS:** Talk about the coefficient of multiple determination R2, and the adjusted R2. Present and explain the relevant formulas and all the terms that are used in the formulas.
+-   **INSTRUCTIONS:** State the hypotheses you test. Specifically, talk about the F-ratio and the H0 and Ha associated with it, as well as the hypotheses you test about each of the individual βi’s (again, state H0 and Ha).
 
 $$
 \log(\text{Median Home Value}) = \beta_0 + \beta_1(\text{Poverty}) + \beta_2(\text{Education}) + \beta_3(\text{Vacancy}) + \beta_4(\text{Single Units}) + \varepsilon
 $$
 
-Describe β’s, ε, and the assumptions (linearity, independence, normality, homoscedasticity, no multicollinearity).\
-Include the OLS estimation formula and R² and adjusted R² formulas.
-
 ## Additional Analyses
 
-(Briefly describe stepwise regression and 5-fold cross-validation — their purpose, how RMSE is calculated.)
+-   **INSTRUCTIONS:** Talk about stepwise regression – discuss what it does and its limitations.
+-   **INSTRUCTIONS:** Talk about k-fold cross-validation (mentioning that k = 5) – discuss what it is used for, describe how it is operationalized and mention that the RMSE is used to compare models (explain what the RMSE is and how it is calculated, presenting and describing any relevant formulas).
 
 ## Software
+
+-   **INSTRUCTIONS:** State that you’re using R for your data analysis.
 
 All analyses were conducted in R Studio 2025.09.1+401 using R language version 4.5.1.
 
 ------------------------------------------------------------------------
 
-# 3. Results
+# 3. RESULTS
 
 ## Exploratory Results
 
 ### Summary Statistics
 
--   INSTRUCTIONS: Present and briefly talk about the table with summary statistics which includes the dependent variable and the predictors (i.e., mean, standard deviation).
+-   **INSTRUCTIONS:** Present and briefly talk about the table with summary statistics which includes the dependent variable and the predictors (i.e., mean, standard deviation).
 
 ```{r}
 #| message: false
 #| warning: false
 # Import relevant libraries.
+library(MASS)
+library(DAAG)
 library(corrplot)
 library(dplyr)
 library(ggplot2)
@@ -114,13 +132,28 @@ sum_stats_table <- data.frame(VARIABLE = c("DEPENDENT VARIABLE", "Median House V
                                            "% Individuals w/ Bachelor's Degrees or Higher",
                                            "% Vacant Houses", "% Single House Units"))
 
-# Input mean values.
-sum_stats_table$MEAN <- c("", sprintf("%.2f", mean_MEDHVAL), "", sprintf("%.2f", mean_NBELPOV100),
-                          sprintf("%.2f", mean_PCTBACHMOR), sprintf("%.2f", mean_PCTVACANT), sprintf("%.2f", mean_PCTSINGLES))
-
-# Input standard deviation values.
-sum_stats_table$SD <- c("", sprintf("%.2f", sd_MEDHVAL), "", sprintf("%.2f", sd_NBELPOV100),
-                        sprintf("%.2f", sd_PCTBACHMOR), sprintf("%.2f", sd_PCTVACANT), sprintf("%.2f", sd_PCTSINGLES))
+sum_stats_table <- data.frame(
+  VARIABLE = c(
+    "**DEPENDENT VARIABLE**", "Median House Value",
+    "**PREDICTORS**", "# Households in Poverty",
+    "% Individuals w/ Bachelor's Degrees or Higher",
+    "% Vacant Houses", "% Single House Units"
+  ),
+  MEAN = c(
+    "", sprintf("$%.2f", mean_MEDHVAL),
+    "", sprintf("%.2f", mean_NBELPOV100),
+    sprintf("%.2f%%", mean_PCTBACHMOR),
+    sprintf("%.2f%%", mean_PCTVACANT),
+    sprintf("%.2f%%", mean_PCTSINGLES)
+  ),
+  SD = c(
+    "", sprintf("$%.2f", sd_MEDHVAL),
+    "", sprintf("%.2f", sd_NBELPOV100),
+    sprintf("%.2f%%", sd_PCTBACHMOR),
+    sprintf("%.2f%%", sd_PCTVACANT),
+    sprintf("%.2f%%", sd_PCTSINGLES)
+  )
+)
 
 kable(sum_stats_table, digits = 2,
       caption = "<b>SUMMARY STATISTICS</b>",
@@ -136,7 +169,9 @@ All the variables' means and standard deviations are close together, with the ba
 
 ### Histograms and Logarithmic Transformations
 
-- INSTRUCTIONS: State whether the variables are normal before and after the logarithmic transformation. Present the histograms of the original variables alongside the histograms of the log-transformed variables, and clearly state whether you’re using the log-transformed or original variable in your regression.
+-   **INSTRUCTIONS:** State whether the variables are normal before and after the logarithmic transformation.
+    -   Present the histograms of the original variables alongside the histograms of the log-transformed variables, and clearly state whether you’re using the log-transformed or original variable in your regression.
+    -   State that the other regression assumptions will be examined in a separate section below (Regression Assumption Checks).
 
 ```{r}
 # Add new columns at end of tibble dataframe that takes the natural logarithm of median house value (y, response variable) and its x, or predictor variables.
@@ -163,7 +198,7 @@ medhval_histogram <- ggplot(regress_data, aes(x = MEDHVAL)) +
     x = "Median Household Value (Dollars, $)",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -178,7 +213,7 @@ lnmedhval_histogram <- ggplot(regress_data, aes(x = LNMEDHVAL)) +
     x = "Log(Median Household Value)",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -201,7 +236,7 @@ pctbachmor_histogram <- ggplot(regress_data, aes(x = PCTBACHMOR)) +
     x = "Percent Bachelor's+ Degrees (Percent, %)",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -216,7 +251,7 @@ lnpctbachmor_histogram <- ggplot(regress_data, aes(x = LNPCTBACHMORE)) +
     x = "Log(Percent Bachelor's+ Degrees)",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -239,7 +274,7 @@ nbelpov_histogram <- ggplot(regress_data, aes(x = NBELPOV100)) +
     x = "Number of Households in Poverty",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -254,7 +289,7 @@ lnbelpov_histogram <- ggplot(regress_data, aes(x = LNNBELPOV100)) +
     x = "Log(Number of Households in Poverty)",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -277,7 +312,7 @@ pctbachmor_histogram <- ggplot(regress_data, aes(x = PCTVACANT)) +
     x = "Percent Vacancies (Percent, %)",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -292,7 +327,7 @@ lnpctbachmor_histogram <- ggplot(regress_data, aes(x = LNPCTVACANT)) +
     x = "Log(Percent Vacancies)",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -315,7 +350,7 @@ pctbachmor_histogram <- ggplot(regress_data, aes(x = PCTSINGLES)) +
     x = "Percent Detached Homes (Percent, %)",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -330,7 +365,7 @@ lnpctbachmor_histogram <- ggplot(regress_data, aes(x = LNPCTSINGLES)) +
     x = "Log(Percent Vacancies)",
     y = "Count"
   ) +
-  theme_minimal(base_family = "Times New Roman") +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 12),
     axis.title.x = element_text(face = "italic", size = 10),
@@ -345,7 +380,8 @@ Other regression assumptions will be examined in a separate section below in "Re
 
 ### Choropleth Maps
 
-- INSTRUCTIONS: Present the choropleth maps of the dependent variable and the predictors.
+-   **INSTRUCTIONS:** Present the choropleth maps of the dependent variable and the predictors.
+    -   Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
 
 ```{r}
 shapefile <- st_read("Lecture_1_RegressionData.shp/RegressionData.shp")
@@ -392,21 +428,21 @@ plots_combined + plot_annotation(
 plots_combined
 ```
 
-- INSTRUCTIONS: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
+-   House values are much higher in northwest Philadelphia, likely because it's a suburb and encompasses Wissahickon Valley Park's vast green space, and proximity to greenery tends to increase property values in neighborhoods.
 
-- House values are much higher in northwest Philadelphia, likely because it's a suburb and encompasses Wissahickon Valley Park's vast green space, and proximity to greenery tends to increase property values in neighborhoods.
+-   Looks like there are more vacant units clustered in northern Philadelphia, which many local Philadelphians anecdotally state possesses high rates of low-income populations and communities in poverty. Can see a similar gradient, although less stark, in southwest Philadelphia and the Mantua neighborhood in west Philadelphia.
 
-- Looks like there are more vacant units clustered in northern Philadelphia, which many local Philadelphians anecdotally state possesses high rates of low-income populations and communities in poverty. Can see a similar gradient, although less stark, in southwest Philadelphia and the Mantua neighborhood in west Philadelphia.
+-   Less rowhouse architecture in the periphery of Philadelphia, which seems to spatially coincide with the visual that displays the natural log of median household values. The city is majorly connected rowhouses or apartment buildings.
 
-- Less rowhouse architecture in the periphery of Philadelphia, which seems to spatially coincide with the visual that displays the natural log of median household values. The city is majorly connected rowhouses or apartment buildings.
+-   High concentrations of those with a bachelor's degree or more residing in Center City, Wissahickon, and University City areas, as well as the northwestern part of the county on the west side of the Schuylkill River that leads toward Bryn Mawr.
 
-- High concentrations of those with a bachelor's degree or more residing in Center City, Wissahickon, and University City areas, as well as the northwestern part of the county on the west side of the Schuylkill River that leads toward Bryn Mawr.
-
-- Many households in poverty seem to encompass areas that don't have detached single-family homes. Lots of noticeable clusters in north, west, and south Philadelphia.
+-   Many households in poverty seem to encompass areas that don't have detached single-family homes. Lots of noticeable clusters in north, west, and south Philadelphia.
 
 ### Correlation Matrix
 
-- INSTRUCTIONS: Present the correlation matrix of the predictors which you obtained from R.
+-   **INSTRUCTIONS:** Present the correlation matrix of the predictors which you obtained from R.
+    -   Talk about whether the correlation matrix shows that there is severe multicollinearity.
+    -   Does the correlation matrix support your conclusions based on your visual comparison of predictor maps?
 
 ```{r}
 correlation_matrix <- cor(regress_data[, c("LNPCTBACHMORE", "LNNBELPOV100", "LNPCTVACANT", "LNPCTSINGLES")],
@@ -435,8 +471,6 @@ ggcorrplot(
 )
 ```
 
-- INSTRUCTIONS: Talk about whether the correlation matrix shows that there is severe multicollinearity. Does the correlation matrix support your conclusions based on your visual comparison of predictor maps?
-
 **Observations:**
 
 -   LNPCTBACHMORE = 0.4818251 (percent bachelor's degrees have a weak positive correlation with median household value)
@@ -455,7 +489,9 @@ ggcorrplot(
 
 ## Regression Results
 
--   Insert regression output (`summary(mod1)`).
+-   **INSTRUCTIONS:** Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.
+-   **INSTRUCTIONS:** Referencing the regression output, interpret the results as in the example included above this report outline.
+-   **NOTE:** YOUR DEPENDENT VARIABLE (AND SOME PREDICTORS) WOULD BE LOG-TRANSFORMED. LOOK AT THE SLIDES FOR EXAMPLES OF INTERPRETING REGRESSION OUTPUT WITH LOG-TRANSFORMED VARIABLES.
 
 ```{r}
 # Regression analysis.
@@ -463,9 +499,6 @@ regress_analysis <- lm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELP
 
 summary(regress_analysis)
 ```
-
-- INSTRUCTIONS: Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value. Referencing the regression output, interpret the results.
-- NOTE: YOUR DEPENDENT VARIABLE (AND SOME PREDICTORS) ARE LOG-TRANSFORMED. LOOK AT THE SLIDES FOR EXAMPLES OF INTERPRETING REGRESSION OUTPUT WITH LOG-TRANSFORMED VARIABLES.
 
 **Residuals Observations:** Residuals are differences between observed values and values predicted by regression model.
 
@@ -511,7 +544,9 @@ summary(regress_analysis)
 
 -   *Adjusted R\^2:* Adjusts R\^2 value based on number of variables in model and number of observations. More accurate measure when there are multiple independent variables, like in this case. Suggests that after adjusting for number of predictors, value of 0.6615 means about 66.15% of variance in dependent variable is accounted for.
 
--   *Standard Error of Estimate (Residual Standard Error):* Indicates average distance observed values fall from regression line (i.e. measure of accuracy of predictions made with regression model). Value of 0.3665 means that predicted values are, on average, 0.3665 units away from actual variables. **NOTE: Whether this value is a small or large error depends on the context and scale of the dependent variable.**
+-   *Standard Error of Estimate (Residual Standard Error):* Indicates average distance observed values fall from regression line (i.e. measure of accuracy of predictions made with regression model). Value of 0.3665 means that predicted values are, on average, 0.3665 units away from actual variables.
+
+    -   NOTE: Whether this value is a small or large error depends on the context and scale of the dependent variable.
 
 -   *Degrees of Freedom (df):* Indicates number of independent variables in model. There are 4 here, which are PCTVACANT (percent vacant units), PCTSINGLES (percent detached single-family homes), PCTBACHMOR (percent bachelor's degrees or more), and LNNBELPOV100 (log of number of households in poverty).
 
@@ -525,8 +560,8 @@ summary(regress_analysis)
 
 ### Scatter Plots of Dependent Variable and Predictors
 
-- INSTRUCTIONS: First state that in this section, you will be talking about testing model assumptions. State that you have already looked at the variable distributions earlier.
-- INSTRUCTIONS: Present scatter plots of the dependent variable and each of the predictors. State whether each of the relationships seems to be linear, as assumed by the regression model. [Hint: they will not look linear.]
+-   **INSTRUCTIONS:** First state that in this section, you will be talking about testing model assumptions. State that you have already looked at the variable distributions earlier.
+-   **INSTRUCTIONS:** Present scatter plots of the dependent variable and each of the predictors. State whether each of the relationships seems to be linear, as assumed by the regression model. \[Hint: they will not look linear.\]
 
 ```{r}
 # Scatter plot of ln(percent bachelor's degrees) vs. ln(median house value).
@@ -573,7 +608,7 @@ plots_combined + plot_annotation(
 
 ### Histogram of Standardized Residuals
 
-- INSTRUCTIONS:	Present the histogram of the standardized residuals. State whether the residuals look normal.
+-   **INSTRUCTIONS:** Present the histogram of the standardized residuals. State whether the residuals look normal.
 
 ```{r}
 #| message: false
@@ -612,7 +647,8 @@ hist_residuals
 
 ### Standardized Residual by Predicted Value Scatter Plot
 
-- INSTRUCTIONS: Present the ‘Standardized Residual by Predicted Value’ scatter plot. What conclusions can you draw from that? Does there seem to be heteroscedasticity? Do there seem to be outliers? Anything else? Discuss. Mention what standardized residuals are.
+-   **INSTRUCTIONS:** Present the ‘Standardized Residual by Predicted Value’ scatter plot. What conclusions can you draw from that? Does there seem to be heteroscedasticity? Do there seem to be outliers? Anything else? Discuss.
+    -   Mention what standardized residuals are.
 
 ```{r}
 # Scatter plot.
@@ -626,11 +662,12 @@ predicted_residual_plot <- ggplot(predicted_residual_data, aes(x = R_PREDICTED, 
 predicted_residual_plot
 ```
 
--   Discuss heteroscedasticity, normality, and independence.
+-   **INSTRUCTIONS:** Referencing the maps of the dependent variable and the predictors that you presented earlier, state whether there seems to be spatial autocorrelation in your variables. That is, does it seem that the observations (i.e., block groups) are independent of each other? Briefly discuss.
 
 ### Choropleth Map of Standardized Regression Residuals
 
--   Map standardized residuals and interpret possible spatial autocorrelation.
+-   **INSTRUCTIONS:** Now, present the choropleth map of the standardized regression residuals. Do there seem to be any noticeable spatial patterns in them? That is, do they seem to be spatially autocorrelated?
+    -   You will examine the spatial autocorrelation of the variables and residuals and run spatial regressions in the next assignment.
 
 ```{r}
 shapefile$residuals_standardized <- predicted_residual_data$R_STANDARD
@@ -650,21 +687,21 @@ ggsave("choropleth_standardized_residuals.png", plot = choropleth_residuals, wid
 
 ## Additional Models
 
--   Insert results of **stepwise regression**.
+### Stepwise Regression
+
+-   **INSTRUCTIONS:** Present the results of the stepwise regression and state whether all 4 predictors in the original model are kept in the final model.
 
 ```{r}
-library(MASS)
-
 step_model <- step(regress_analysis, direction = "both")
 
 step_model$anova
 ```
 
--   Insert results of **5-fold cross-validation**, and compare RMSE between models.
+### Cross-Validation
+
+-   **INSTRUCTIONS:** Present the cross-validation results – that is, compare the RMSE of the original model that includes all 4 predictors with the RMSE of the model that only includes PCTVACANT and MEDHHINC as predictors.
 
 ```{r}
-library(DAAG)
-
 # Model 1
 fit1 <- lm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES, data = regress_data)
 #summary(fit1)
@@ -695,9 +732,16 @@ rmse2
 
 ------------------------------------------------------------------------
 
-# 4. Discussion and Limitations
+# 4. DISCUSSION AND LIMITATIONS
 
-(Summarize key findings, discuss which predictors were significant, model strength, any assumption violations, and data limitations.\
-Discuss potential use of Ridge/LASSO regression, when appropriate.)
+-   **INSTRUCTIONS:** Recap what you did in the paper and your findings. Discuss what conclusions you can draw, which variables were significant and whether that was surprising or not.
+-   **INSTRUCTIONS:** Talk about the quality of the model – that is, state if this is a good model overall (e.g., R2, F-ratio test), and what other predictors that we didn’t include in our model might be associated with our dependent variable.
+    -   Looking at the stepwise regression results, did the final model include all 4 predictors or were some dropped? What does that tell you about the quality of the model?
+    -   Looking at the cross-validation results, was the RMSE better for the 4 predictor model or the 2 predictor model?
+-   **INSTRUCTIONS:** If you haven’t done that in the Results section, talk explicitly about the limitations of the model – that is, mention which assumptions were violated, and if applicable, how that may affect the model/parameter estimation/estimated significance.
+    -   In addition, talk about the limitations of using the NBELPOV100 variable as a predictor – that is, what are some limitations of using the raw number of households living in poverty rather than a percentage?
+-   **INSTRUCTIONS:** Would it make sense to run Ridge or LASSO regression here? Explain briefly (\~4-5 sentences) what these methods are, when they’re used, and why they would or would not be appropriate here.
 
 ------------------------------------------------------------------------
+
+# 5. WORKS CITED
