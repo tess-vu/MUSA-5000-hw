@@ -18,8 +18,6 @@ The task is to explore the relationship between median house values and various 
 
 ## Data Cleaning
 
--   **INSTRUCTIONS:** Simply state that the original dataset had 1816 observations (i.e., block groups) and was cleaned in order to achieve a dataset with 1720 observations (that is, basically include the information about data cleaning that is on the very the first page of this assignment).
-
 The original Philadelphia block group data set had 1,816 observations. The data was cleaned by removing the following block groups:
 
 ```         
@@ -38,16 +36,15 @@ The final data set that was tested consists of 1,720 block groups.
 
 Our purpose is to examine the summary statistics and distributions of variables. As part of our exploratory data analysis, the correlations between the predictors are examined as well.
 
-A correlation coefficient is a statistical measure that quantifies the strength and direction of the relationship between two variables. It is calculated as the sum of the products of each observation’s deviation from the mean of variable x and the mean of variable y, divided by the product of the standard deviations of both variables, where x_i and y_i are individual observations, x̄ and ȳ are the sample means, and the denominator represents the product of the standard deviations.
-
-
-
+A correlation coefficient is a standardized measure of the strength of the relationship between variables. The formula for calculating the correlation coefficient *r* is:
 
 $$
 r = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum (x_i - \bar{x})^2 \sum (y_i - \bar{y})^2}}
 $$ 
+where x_i and y_i represent individual observations of the sample data and \bar{x} and \bar{y} are the sample means. 
 
-*r* can take on ranges from -1 to 1, and r = 0 meaning there is no linear relationship. Explain that *r* ranges from -1 to 1, and r = 0 means no linear relationship.
+The value of correlation coefficient r ranges from −1 to +1. A value of r = +1 indicates a perfect positive linear relationship, in that all (x_i, y_i) pairs lie on a line with a positive slope, and r = −1 indicates a perfect negative linear relationship, in that all (x_i, y_i) pairs lie on a line with a negative slope. A value of r = 0 indicates a lack of linear relationship between the variables.     
+
 
 ## Multiple Regression Analysis
 
