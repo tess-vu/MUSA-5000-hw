@@ -35,15 +35,19 @@ The final data set that was tested consists of 1,720 block groups.
 
 -   **INSTRUCTIONS:** State that you will examine the summary statistics and distributions of variables.
 -   **INSTRUCTIONS:** Also state that as part of your exploratory data analysis, you will examine the correlations between the predictors.
-    -   Explain what a correlation is, and provide the formula for the sample correlation coefficient r. Also mention the possible range of r values, and what correlation of 0 means
 
 Our purpose is to examine the summary statistics and distributions of variables. As part of our exploratory data analysis, the correlations between the predictors are examined as well.
 
-A correlation coefficient is a statistical measure that quantifies the strength and direction of the relationship between two variables. It is calculated as the sum of the products of each observation’s deviation from the mean of variable x and the mean of variable y, divided by the product of the standard deviations of both variables.
+A correlation coefficient is a statistical measure that quantifies the strength and direction of the relationship between two variables. It is calculated as the sum of the products of each observation’s deviation from the mean of variable x and the mean of variable y, divided by the product of the standard deviations of both variables, where x_i and y_i are individual observations, x̄ and ȳ are the sample means, and the denominator represents the product of the standard deviations.
+
+
+
 
 $$
 r = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum (x_i - \bar{x})^2 \sum (y_i - \bar{y})^2}}
-$$ *r* can take on ranges from -1 to 1, and r = 0 meaning there is no linear relationship. Explain that *r* ranges from -1 to 1, and r = 0 means no linear relationship.
+$$ 
+
+*r* can take on ranges from -1 to 1, and r = 0 meaning there is no linear relationship. Explain that *r* ranges from -1 to 1, and r = 0 means no linear relationship.
 
 ## Multiple Regression Analysis
 
@@ -84,6 +88,7 @@ All analyses were conducted in R Studio 2025.09.1+401 using R language version 4
 ```{r}
 #| message: false
 #| warning: false
+#| include: false
 # Import relevant libraries.
 library(MASS)
 library(DAAG)
@@ -109,6 +114,7 @@ regress_data <- as_tibble(regress_data)
 ```
 
 ```{r}
+#| include: false
 mean_MEDHVAL <- mean(regress_data[["MEDHVAL"]])
 sd_MEDHVAL <- sd(regress_data[["MEDHVAL"]])
 
@@ -126,6 +132,7 @@ sd_PCTSINGLES <- sd(regress_data[["PCTSINGLES"]])
 ```
 
 ```{r}
+#| echo: false
 # Create data frame for summary statistics table.
 sum_stats_table <- data.frame(VARIABLE = c("DEPENDENT VARIABLE", "Median House Value",
                                            "PREDICTORS", "# Households in Poverty",
@@ -174,6 +181,7 @@ All the variables' means and standard deviations are close together, with the ba
     -   State that the other regression assumptions will be examined in a separate section below (Regression Assumption Checks).
 
 ```{r}
+#| include: false
 # Add new columns at end of tibble dataframe that takes the natural logarithm of median house value (y, response variable) and its x, or predictor variables.
 regress_data <- regress_data %>%
   mutate(
@@ -187,6 +195,7 @@ regress_data <- regress_data %>%
 ```
 
 ```{r}
+#| echo: false
 #| message: false
 #| warning: false
 # Histogram of median household value
@@ -225,6 +234,7 @@ grid.arrange(medhval_histogram, lnmedhval_histogram, ncol = 2)
 ```
 
 ```{r}
+#| echo: false
 #| message: false
 #| warning: false
 # Histogram of percent bachelor's degrees or more.
@@ -263,6 +273,7 @@ grid.arrange(pctbachmor_histogram, lnpctbachmor_histogram, ncol = 2)
 ```
 
 ```{r}
+#| echo: false
 #| message: false
 #| warning: false
 # Histogram of number of households in poverty.
@@ -301,6 +312,7 @@ grid.arrange(nbelpov_histogram, lnbelpov_histogram, ncol = 2)
 ```
 
 ```{r}
+#| echo: false
 #| message: false
 #| warning: false
 # Histogram of percent vacancies.
@@ -339,6 +351,7 @@ grid.arrange(pctbachmor_histogram, lnpctbachmor_histogram, ncol = 2)
 ```
 
 ```{r}
+#| echo: false
 #| message: false
 #| warning: false
 # Histogram of percent detached single house units.
@@ -384,6 +397,7 @@ Other regression assumptions will be examined in a separate section below in "Re
     -   Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
 
 ```{r}
+#| echo: false
 shapefile <- st_read("Lecture_1_RegressionData.shp/RegressionData.shp")
 
 choropleth_LNMEDHVAL <- ggplot() +
@@ -445,6 +459,7 @@ plots_combined
     -   Does the correlation matrix support your conclusions based on your visual comparison of predictor maps?
 
 ```{r}
+#| echo: false
 correlation_matrix <- cor(regress_data[, c("LNPCTBACHMORE", "LNNBELPOV100", "LNPCTVACANT", "LNPCTSINGLES")],
                           use = "complete.obs",
                           method = "pearson")
@@ -494,6 +509,7 @@ ggcorrplot(
 -   **NOTE:** YOUR DEPENDENT VARIABLE (AND SOME PREDICTORS) WOULD BE LOG-TRANSFORMED. LOOK AT THE SLIDES FOR EXAMPLES OF INTERPRETING REGRESSION OUTPUT WITH LOG-TRANSFORMED VARIABLES.
 
 ```{r}
+#| echo: false
 # Regression analysis.
 regress_analysis <- lm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV100, regress_data)
 
@@ -564,6 +580,7 @@ summary(regress_analysis)
 -   **INSTRUCTIONS:** Present scatter plots of the dependent variable and each of the predictors. State whether each of the relationships seems to be linear, as assumed by the regression model. \[Hint: they will not look linear.\]
 
 ```{r}
+#| echo: false
 # Scatter plot of ln(percent bachelor's degrees) vs. ln(median house value).
 plot_LNPCTBACHMORE <- ggplot(regress_data, aes(x = LNPCTBACHMORE, y = LNMEDHVAL)) +
   geom_point(size = 2, alpha = 0.3, color = "midnightblue") +
@@ -611,6 +628,7 @@ plots_combined + plot_annotation(
 -   **INSTRUCTIONS:** Present the histogram of the standardized residuals. State whether the residuals look normal.
 
 ```{r}
+#| echo: false
 #| message: false
 #| warning: false
 # Fitted.
@@ -651,6 +669,7 @@ hist_residuals
     -   Mention what standardized residuals are.
 
 ```{r}
+#| echo: false
 # Scatter plot.
 predicted_residual_plot <- ggplot(predicted_residual_data, aes(x = R_PREDICTED, y = R_STANDARD)) + 
   geom_point(size = 2, alpha = 0.3, color = "midnightblue") +
@@ -670,10 +689,12 @@ predicted_residual_plot
     -   You will examine the spatial autocorrelation of the variables and residuals and run spatial regressions in the next assignment.
 
 ```{r}
+#| include: false
 shapefile$residuals_standardized <- predicted_residual_data$R_STANDARD
 ```
 
 ```{r}
+#| echo: false
 choropleth_residuals <- ggplot() +
   geom_sf(data = shapefile, aes(fill = residuals_standardized), color = "cornsilk2", linewidth = 0.25) +
   scale_fill_viridis_c(option = "viridis") +
@@ -692,6 +713,7 @@ ggsave("choropleth_standardized_residuals.png", plot = choropleth_residuals, wid
 -   **INSTRUCTIONS:** Present the results of the stepwise regression and state whether all 4 predictors in the original model are kept in the final model.
 
 ```{r}
+#| echo: false
 step_model <- step(regress_analysis, direction = "both")
 
 step_model$anova
@@ -702,6 +724,7 @@ step_model$anova
 -   **INSTRUCTIONS:** Present the cross-validation results – that is, compare the RMSE of the original model that includes all 4 predictors with the RMSE of the model that only includes PCTVACANT and MEDHHINC as predictors.
 
 ```{r}
+#| echo: false
 # Model 1
 fit1 <- lm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES, data = regress_data)
 #summary(fit1)
@@ -717,6 +740,7 @@ rmse1
 ```
 
 ```{r}
+#| echo: false
 # Model 2: LNMEDHVAL ~ PCTVACANT + MEDHHINC
 fit2 <- lm(LNMEDHVAL ~ PCTVACANT + MEDHHINC, data = regress_data)
 #summary(fit2)
