@@ -94,6 +94,12 @@ title(main='Region with 27 neighbors')
 
 ## 3. Global Moran's I
 
+```{r}
+#Choosing W as the style parameter, which will perform row standardization.
+queenlist <- nb2listw(queen, style = "W")
+moran(regress_data$LNMEDINC, queenlist, n=length(queenlist$neighbours), S0 =Szero(queenlist))$"I"
+```
+
 ## 4. Local Moran's I
 
 ## 5. OLS Regression (as in previous HW)
