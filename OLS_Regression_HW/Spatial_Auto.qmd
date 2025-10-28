@@ -295,7 +295,7 @@ lag_reg<-lagsarlm(formula=LNMEDINC ~ LNMEDHVAL + PCTVACANT, data=regress_data, q
 summary(lag_reg)
 ```
 ```{r}
-LR.Sarlm(lag_reg, ols_reg) #Here lagreg is the SL output; reg is the OLS output
+LR.Sarlm(lag_reg, ols_reg) #Here lag_reg is the SL output; ols_reg is the OLS output
 ```
 ```{r}
 #Prints the results of the Breusch-Pagan Test to assess whether heteroscedasticity is present (package: lmtest)
@@ -311,7 +311,7 @@ jarque.bera.test(lag_reg$residuals)
 ```
 Now, we can map the Spatial Lag Model residuals (which is an exercise left for the student) and look at the the Moran’s I of the Spatial Lag Model residuals. We see that these residuals from the Spatial Lag Model aren’t spatially autocorrelated, which is exactly what we were hoping to achieve.
 ```{r}
-res_lag <- lag_reg$residuals
+lag_res <- lag_reg$residuals
 
 # This checks whether any spatial autocorrelation remains after accounting for the spatial lag
 # Arguments:
@@ -319,7 +319,7 @@ res_lag <- lag_reg$residuals
 #  - queenlist: spatial weights list (queen contiguity)
 #  - 999: number of random permutations for the Monte Carlo simulation
 #  - alternative="two.sided": tests both positive and negative spatial autocorrelation
-lag_moran_mc <- moran.mc(res_lag, queenlist,999, alternative="two.sided")
+lag_moran_mc <- moran.mc(lag_res, queenlist,999, alternative="two.sided")
 
 lag_moran_mc
 ```
@@ -339,9 +339,215 @@ error_res_mean <- sapply(queen_neighbors, function(x) mean(error_res[x]))
 
 summary(error_reg)
 ```
+```{r}
+# Perform a likelihood ratio (LR) test comparing the spatial error model to OLS
+#  - error_reg: fitted spatial error model (errorsarlm)
+#  - ols_reg: fitted OLS model
+LR.Sarlm(error_reg, ols_reg)
+```
+```{r}
+#Prints the results of the Breusch-Pagan Test to assess whether heteroscedasticity is present (package: lmtest)
+bptest.Sarlm(error_reg, studentize=FALSE)
+```
+```{r}
+#Prints the results of the Koenker-Bassett Test (also known as the Studentized Breusch-Pagan Test) to assess whether heteroscedasticity is present (package: lmtest)
+bptest.Sarlm(error_reg)   
+```
+```{r}
+#Prints the results of the Jarque-Bera Test to assess whether residuals are normal (package: tseries)
+jarque.bera.test(error_reg$residuals)
+```
+```{r}
+# Perform a Monte Carlo test for Moran's I on the residuals of the spatial error model
+#  - error_res: residuals from the spatial error model (errorsarlm)
+#  - queenlist: spatial weights list (queen contiguity)
+#  - 999: number of random permutations for the Monte Carlo simulation
+#  - alternative="two.sided": tests for both positive and negative spatial autocorrelation
+error_moran_mc<-moran.mc(error_res, queenlist, 999, alternative="two.sided")
+
+error_moran_mc
+```
+
+## 8. Regression Analysis: Geographically Weighted Regression
+
+###Bandwidth Selection
+
+Unlike the OLS, SL and SE Models, GWR allows for spatial non-stationarity. It is based on the premise that the relationships between variables aren’t the same at all spatial locations.
+
+Although for the previous analyses, we define neighbors, for the GWR analyses, we will define bandwidths. The bandwidth can be manually entered by the user, or it can be determined by R through cross-validation. Here, we will be using the spgwr package in R to carry out the bandwidth selection and run GWR.
+
+We will use the gwr.sel function to calculate the optimal bandwidth for GWR. Let’s examine the parameters specified in the code below.
+
+formula: We specify the OLS regression model formula we used in our OLS Model above. This is because a separate OLS equation for every location in the dataset in a GWR Model, and these separate OLS equations incorporate the dependent and explanatory variables of locations falling within the bandwidth of each target location.
+
+data: You can specify a dataframe here, or a SpatialPointsDataFrame or SpatialPolgonsDataframe object that was defined in the package sp.
+
+coords: If you specified a non-spatial dataframe above, it is neccessary to include a matrix of coordinates of points or polygons that represents the spatial positions of the observations. However, specification for this parameter is not neccessary if you specified a spatial dataframe, as was done for this example. Here, we specified a SpatialPointsDataFrame.
+
+method: Here, you specify how an ‘optimal’ bandwidth should be defined. AIC is the approach used here to select a bandwidth that optimises the model AICc (corrected AIC), which is a relative measure of goodness of model fit. Another method you can specify here is cv, which selects a bandwidth that allows for the GWR results to be approximately equal acoss cross-validated folds - here, your objective is a generalisable GWR Model.
+
+adapt: TRUE returns a proportion between 0 and 1 of the observations to include in the weighting scheme for an adaptive bandwidth. On the other hand, if a global fixed bandwidth that remains constant for all locations suit your purpose, set this parameter as FALSE.
+
+Let’s start with adaptive bandwidth, which varies the distance, but fixes the number of neighbors for each observation. Given that we specified a preference for an adaptive bandwidth optimized based on AICc, the output (despite its labels) is not a distance, but rather, the proportion of observations to be included for each location in the GWR Model. Here, it is recommended that 0.007862703 (or ~0.786%) of the observations be used for each location - the bandwidth should be adapted to capture about 13 observations (0.00786*1720) for each location. You might think this is too few observations to be fitted for each local regression - in this case, the printed AICc measures can serve as a guidance for the proportion you may input in the GWR Model later on. Keep in mind that finding the optimal value of bandwidth takes a while, so be patient while the code runs.
 
 
-## 8. Spatial Lag Regression (w/ Moran's I scatterplot of 99 permutations)
+```{r}
+
+# convert regress_data from df to spatial data
+regress_spatial <- as(regress_data, 'Spatial')  #These analyses are easier to do when the data are of the SpatialPolygonsDataFrame class
+class (regress_spatial)
+```
+```{r}
+# Select an adaptive bandwidth for Geographically Weighted Regression (GWR)
+#   - formula: dependent variable (LNMEDINC) and predictors (LNMEDHVAL, PCTVACANT)
+#   - data: regress_spatial must be a SpatialPolygonsDataFrame (converted from sf)
+#   - method = "aic": uses Akaike Information Criterion to select the optimal bandwidth
+#   - adapt = TRUE: uses an adaptive bandwidth (proportion of nearest neighbors)
+#     instead of a fixed distance bandwidth
+bandwidth <- gwr.sel(formula = LNMEDINC ~ LNMEDHVAL + PCTVACANT, 
+              data = regress_spatial,
+              method = "aic",
+              adapt = TRUE)
+```
+```{r}
+bandwidth
+```
+We might also want to create a fixed bandwidth. Notice that the output values more closely approximate distance (in the units of the shapfile, i.e., feet) instead of a proportion between 0 and 1.
+```{r}
+#setting a fixed bandwidth
+bandwidth_fixed<-gwr.sel(formula=LNMEDINC~LNMEDHVAL+PCTVACANT, 
+            data=regress_spatial,
+            method = "aic",
+            adapt = FALSE)
+```
+```{r}
+bandwidth_fixed
+```
+Running GWR To fit a GWR Model, we use the command gwr. Again, specify the formula as used in the previous OLS Model and the bandwidth defined in the earlier step.
+
+We can also set a geographical weighting function for the bandwidth to specify how observations of varying distances from the location should be accounted for. If gweight=gwr.Gauss, the weights allocated to distributions vary normally like in a Gaussian (i.e., normal) distribution. If gwr.bisquare is specified, observations within the a certain distance threshold (specified by the bandwidth) from the location are weighted as 1, while observations beyond this threshold are weighted as 0.
+
+We can compare the outputs from using an adaptive bandwidth specified by the proportion of observations included in each local regression (adapt=bw), and a fixed bandwidth (bandwidth=bw_fixed).
+
+Below are the results using the adaptive bandwidth.
+```{r}
+# Formula: dependent variable (LNMEDINC) and predictors (LNMEDHVAL, PCTVACANT)
+#   - data: regress_data (SpatialPolygonsDataFrame)
+#   - adapt = bandwidth: uses the adaptive bandwidth selected earlier (proportion of nearest neighbors)
+#   - gweight = gwr.Gauss: applies a Gaussian weighting kernel to give nearer observations more influence
+#   - se.fit = TRUE: returns local standard errors for each coefficient estimate
+#   - hatmatrix = TRUE: stores diagnostic info for model evaluation (e.g., local R²)
+gwr_model<-gwr(formula=LNMEDINC~LNMEDHVAL+PCTVACANT,
+              data=regress_spatial,
+              adapt = bandwidth, #adaptive bandwidth determined by proportion of observations accounted for
+              gweight=gwr.Gauss,
+              se.fit=TRUE, #to return local standard errors
+              hatmatrix = TRUE)
+
+gwr_model
+```
+Below are the results using the fixed bandwidth.
+
+```{r}
+# results using fixed bandwidth
+gwr_model_fixed<-gwr(formula=LNMEDINC~LNMEDHVAL+PCTVACANT,
+              data=regress_spatial,
+              bandwidth = bandwidth_fixed, #fixed bandwidth
+              gweight=gwr.Gauss,
+              se.fit=TRUE, #to return local standard errors
+              hatmatrix = TRUE)
+
+gwr_model_fixed
+```
+
+Notice that when we construct our GWR Model, the output from gwr.sel (where adapt=TRUE) should be specified for the parameter adapt. On the other hand, if we were interested in a fixed bandwidth, the output from gwr.sel (where adapt=FALSE) should be specified for the parameter bandwidth. Also notice the difference in the results. We seem to be getting a better fit (based on AIC), less error (based on Residual sum of squares), and a slightly better global R2 using the GWR Model with an adaptive bandwidth. Keep in mind that when comparing the GWR Model to OLS, Spatial Lag and Spatial Error, you should use the AIC and not the AICc.
+
+Presenting GWR Output Using Adaptive Bandwidth We can look at a summary of the coefficients of the local regressions, stored in the SDF object within thegwrmodel. Note in particular the minimum and maximum values of the Local R2 (0.05789 - 0.75169). There are no negative values, meaning that this output, unlike the output we get in some versions of ArcGIS Pro, is correct.
+
+```{r}
+# Summarize the SpatialDataFrame output from the GWR model
+summary(gwr_model$SDF)
+```
+We can also map the standardized coefficients. The higher the absolute value of the ratio between the coefficient and the standard error, the more plausible it is that the relationship between the predictor and the dependent variable is significant at the location.
+
+```{r}
+# Create readable break labels 
+breaks <- c(-Inf, -6, -4, -2, 0, 2, 4, 6, Inf)
+labels <- c("Less than -6", "-6 to -4", "-4 to -2", "-2 to 0", 
+            "0 to 2", "2 to 4", "4 to 6", "Greater than 6")
+
+gwr_results<-as.data.frame(gwr_model$SDF)
+regress_spatial$coefLNMEDHVALst<-gwr_results$LNMEDHVAL/gwr_results$LNMEDHVAL_se
+regress_spatial$coefPCTVACANTst<-gwr_results$PCTVACANT/gwr_results$PCTVACANT_se
+
+regress_spatial$gwrE<-gwr_results$gwr.e
+regress_spatial$localR2<-gwr_results$localR2
+
+# LNMEDHVAL standardized coefficient map
+coefLNMEDHVAL <- tm_shape(regress_spatial) +
+  tm_polygons(
+    col = "coefLNMEDHVALst",
+    palette = "-RdBu",
+    breaks = breaks,
+    labels = labels,        # custom labels
+    style = "fixed"         # fixed breaks
+  ) +
+  tm_layout(
+    frame = FALSE,
+    legend.position = c("right", "bottom"),   # bottom-right corner
+    legend.title.size = 0.8,
+    legend.text.size = 0.7
+  ) +
+  tm_title("Median House Value (Log)")
+
+# PCTVACANT standardized coefficient map
+coefPCTVACANT <- tm_shape(regress_spatial) +
+  tm_polygons(
+    col = "coefPCTVACANTst",
+    palette = "-RdBu",
+    breaks = breaks,
+    labels = labels,
+    style = "fixed",
+    fill.legend = tm_legend(
+      title = "Std. Coefficient\nPCTVACANT",
+      position = c("right", "bottom"),
+      text.size = 0.6,
+      hist.height = 0.25,
+      bg.color = "white",
+      bg.alpha = 0.8,
+      frame = FALSE
+    )
+  ) +
+  tm_title("Percentage of Housing Vacant") +
+  tm_layout(
+    frame = FALSE,
+    outer.margins = c(0.01, 0.01, 0.01, 0.01),
+    legend.position = c("right", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.6
+  )
+
+tmap_arrange(
+  LNMEDHVAL_coef,
+  PCTVACANT_coef,
+  ncol = 2,
+  widths = c(1, 1),  # equal map width
+  heights = c(1)     # larger overall map height
+)
+
+# WHY WONT MY FUCKING LABELS WORK ASDDFJKGHJAKDGLHL
+```
+
+
+And we can also look at the spatial distribution of the local R-squares. We can see that the two predictors do a good job explaining the variance in our dependent variable in NW Philadelphia, but not in many other parts of the city.
+
+```{r}
+tm_shape(regress_spatial)+
+  tm_fill(col='localR2',  breaks=c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7), n=5, palette = 'Blues')+
+  tm_layout(frame=FALSE)
+
+```
+Finally, we can also look at the spatial autocorrelation in GWR residuals. This exercise is left for the student (spoiler alert: there’s much less autocorrelation in GWR residuals than in OLS residuals). Note that the residuals are extracted above using the command shp$gwrE<-gwrresults$gwr.e.
 
 ## 9. Spatial Error Regression (w/ Moran's I scatterplot of 99 permutations)
 
@@ -356,3 +562,121 @@ summary(error_reg)
 ### 10c. Moran's I scatterplot and random permutations test for GWR residuals
 
 ### 10d?. Follow slide instructions to map local regression results
+
+## Model comparison (exercise is left for the student)
+
+We can do the following to compare all 4 models:
+1. Look at the Moran’s I of the residuals from each model and choose the model with the lowest (absolute) Moran’s I
+2. Compare the AIC values from each model and choose the model with the lowest value
+
+
+```{r}
+# Compute Moran's I of residuals for each model to measures remaining spatial autocorrelation. 
+# The closer the Moran's I statistic is to 0, the better.
+
+moran_ols <- moran.mc(standardised_res, queenlist, 999, alternative = "two.sided")
+moran_lag <- moran.mc(lag_reg$residuals, queenlist, 999, alternative = "two.sided")
+moran_error <- moran.mc(error_reg$residuals, queenlist, 999, alternative = "two.sided")
+moran_gwr <- moran.mc(gwr_model$SDF$gwr.e, queenlist, 999, alternative = "two.sided")
+```
+
+
+```{r}
+moran_ols 
+moran_lag 
+moran_error
+moran_gwr
+```
+
+In addition, we can do the following to compare the Spatial Lag Model to OLS:
+1. Compare the log likelihoods; the model with the higher value is the better one.
+2. Examine the results of the likelihood ratio test; if it’s significant, the Spatial Lag Model is better than OLS.
+
+```{r}
+# Compare AIC values. 
+# The lower the AIC, the better the model fit (after penalization).
+
+aic_ols <- AIC(ols_reg)
+aic_lag <- AIC(lag_reg)
+aic_error <- AIC(error_reg)
+aic_gwr <- gwr_model$results$AICc   # GWR reports a corrected AIC (AICc)
+```
+
+
+```{r}
+aic_ols
+aic_lag
+aic_error
+aic_gwr
+```
+
+
+```{r}
+# Compare Log-Likelihoods and Likelihood Ratio Tests.
+# Higher log-likelihood = better model fit.
+
+loglik_ols   <- logLik(ols_reg)
+loglik_lag   <- logLik(lag_reg)
+loglik_error <- logLik(error_reg)
+
+# Likelihood ratio tests
+lr_lag_vs_ols   <- LR.Sarlm(lag_reg, ols_reg)
+lr_error_vs_ols <- LR.Sarlm(error_reg, ols_reg)
+```
+
+
+```{r}
+lr_lag_vs_ols
+lr_error_vs_ols
+# Significant LR test (p < 0.05) = spatial model significantly improves on OLS.
+```
+
+
+```{r}
+# Compare R-squared values (OLS vs. GWR) GWR = quasi-global R-squared to compare with OLS.
+r2_ols <- summary(ols_reg)$r.squared 
+
+# OLS comes with the R-squared value, but gwr does not. We need to calculate the R-squared value
+y <- regress_data$LNMEDINC # Dependent variable vector
+r2_gwr <- 1 - (gwr_model$results$rss / sum((y - mean(y))^2))
+
+```
+
+```{r}
+r2_ols
+r2_gwr
+# Higher R² = model explains more variance.
+```
+
+
+```{r}
+# Comparison summary table
+
+comparison <- data.frame(
+  Model = c("OLS", "Spatial Lag", "Spatial Error", "GWR (Adaptive)"),
+  # AIC: Lower AIC indicates better model fit after penalization
+  AIC = c(
+    AIC(ols_reg),
+    AIC(lag_reg),
+    AIC(error_reg),
+    gwr_model$results$AICc   # Use AICc from GWR
+  ),
+  # Log-likelihood: Higher value indicates better fit
+  LogLik = c(
+    as.numeric(logLik(ols_reg)),
+    as.numeric(logLik(lag_reg)),
+    as.numeric(logLik(error_reg)),
+    NA   # LogLik not reported for GWR
+  ),
+  # R-squared: Proportion of variance explained
+  R2 = c(
+    summary(ols_reg)$r.squared,
+    NA,  # Not reported for SAR/SEM
+    NA,  # Not reported for SEM
+    r2_gwr  # Quasi-global R2
+  )
+)
+
+comparison
+```
+
