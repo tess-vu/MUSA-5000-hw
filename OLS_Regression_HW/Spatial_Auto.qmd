@@ -233,22 +233,35 @@ summary(ols_reg)
 
 The expected percent of median income when all predictors are 0 is 5.650956%. However, this is an unrealistic baseline estimate. When it comes to LNMEDHVAL, the output indicates that a 1% increase in median home value is associated with a 0.421546% increase in median income, holding percent vacancies constant. With PCTVACANT, the output indicates that a 1% increase in vacancies is associated with a 0.009191% decrease in median income, holding median home value constant. Both predictors show p < 0.001, so their very low p-values indicate high statistic significance.
 
-The residuals, or the error between the predicted value and the observed value, look to be centered very near 0, so there's seemingly no bias when looking at just the numbers. However, residual plots to visualize any heteroscedasticity will need to be plotted. The residuals seem to deviate from -2.53728 to 1.26485, which signals more underestimation for this model than overestimation.
+The residuals, or the error between the predicted value and the observed value, look to be centered very near 0, so there's seemingly no bias when looking at just the numbers. However, residual plots to visualize any heteroscedasticity will need to be plotted. The residuals seem to deviate from -2.53728 to 1.26485, which signals somewhat more underestimation for this model than overestimation.
+
+This model's adjusted R-squared at 0.4403 indicates it explains around 44.03% of the variation in the model, a very marginal adjustment from the original R-squared at 0.441, or 44.10%.
+
+The F-statistic value of 677.3 indicates high statistical significance, meaning that at least one predictor is useful.
+
+The residual standard error 0.3676 indicates that the model is, on average, off on its predictions by 0.3676.
 
 ```{r}
 #Prints the log likelihood
 logLik(ols_reg)  
 ```
+**Log Likelihood Interpretation:** The number of parameters, 4, indicate the response and two predictor variables along with the residual variance. This measures how well the predicted values match the observed data under assumed error distribution. A higher, or less negative value means a better fit for the data, whereas a lower, or more negative value, means a worse fit for the data. However, value is used as a comparison, so observing in isolation is not generally helpful.
 
 ```{r}
 #Prints the results of the Breusch-Pagan Test to assess whether heteroscedasticity is present (package: lmtest)
 bptest(ols_reg, studentize=FALSE)
 ```
 
+**Breusch-Pagan Test Interpretation:** This is used to determine heteroscedasticity in a regression model, akin to plotting residuals. The BP is 68.649 and p-value is significantly less than 0.001, so this means the we reject the null hypothesis, indicating that the data is heteroscedastic. Of course, this violates one of the OLS assumptions for normality of residuals.
+
+Spatially speaking, the variance of the errors not being constant across all observations means that the prediction errors are overestimated or underestimated for some blocks as opposed to others.
+
 ```{r}
 #Prints the results of the Koenker-Bassett Test (also known as the Studentized Breusch-Pagan Test) to assess whether heteroscedasticity is present (package: lmtest)
 bptest(ols_reg)
 ```
+
+**Studentized Breusch-Pagan Test Interpretation:** Like the previous test, it observes for any heteroscedasticity, the only difference being that the original assumes normal distribution off the OLS residual values. However, the Studentized version is less stringent as it assumes non-normal distribution and adjusts for variance, this makes it better to use when certain data is known to be highly skewed, like this paper's analysis of median income with housing prices and vacancies in Philadelphia. Again, with this output, the CP is 20.892 with a very small p-value, meaning reject the null hypothesis, and the data is heteroscedastic.
 
 ```{r}
 #Prints the results of the White Test to assess whether heteroscedasticity is present (package: whitestrap)
