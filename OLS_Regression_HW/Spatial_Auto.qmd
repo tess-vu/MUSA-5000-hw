@@ -118,7 +118,7 @@ hist(moranI_mc_res, freq=10000000, nclass=100)   #Draws distribution of Moran's 
 abline(v=moran(regress_data$LNMEDINC, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I`, col='red')  
 ```
 
-**Monte Carlo Interpretation:** 0.55247 Moran's I value indicates strong positive spatial autocorrelation, so many of the block groups are clustered together with high-income areas aside other high-income areas and low-income areas aside other low-income areas.
+**Monte Carlo Interpretation:** 0.55247 Moran's I value indicates strong positive spatial autocorrelation, so many of the block groups are clustered together with high-income areas aside other high-income areas and low-income areas aside other low-income areas. The histogram shows that the spatial pattern observed in Philadelphia's block groups (red line) are leagues beyond, and statistically significant, compared to the random permutations in the histogram. That is, there's a less than 1% chance that Philadelphia's positive spatial autocorrelation occurred by random chance.
 
 ```{r}
 #Create Moran plot (lagged value against observed value)
@@ -228,6 +228,12 @@ ols_reg<-lm(formula=LNMEDINC ~ LNMEDHVAL + PCTVACANT, data=regress_data)
 
 summary(ols_reg)
 ```
+
+**Regression Interpretation:** We are predicting LNMEDINC (log of median income), the [y-hat_i], with predictors LNMEDHVAL (log of median house value) and PCTVACANT (percent vacancies), respectively [x_1i] and [x_2i].
+
+The expected percent of median income when all predictors are 0 is 5.650956%. However, this is an unrealistic baseline estimate. When it comes to LNMEDHVAL, the output indicates that a 1% increase in median home value is associated with a 0.421546% increase in median income, holding percent vacancies constant. With PCTVACANT, the output indicates that a 1% increase in vacancies is associated with a 0.009191% decrease in median income, holding median home value constant. Both predictors show p < 0.001, so their very low p-values indicate high statistic significance.
+
+The residuals, or the error between the predicted value and the observed value, look to be centered very near 0, so there's seemingly no bias when looking at just the numbers. However, residual plots to visualize any heteroscedasticity will need to be plotted. The residuals seem to deviate from -2.53728 to 1.26485, which signals more underestimation for this model than overestimation.
 
 ```{r}
 #Prints the log likelihood
