@@ -580,43 +580,6 @@ regress_data$localR2 <- gwr_results$localR2
 ```
 
 ```{r}
-# LNNBELPOV
-coefLNNBELPOV<-tm_shape(regress_data)+
-  tm_fill(col='coefLNNBELPOVst', breaks=c(-Inf, -6, -4, -2, 0, 2, 4, 6, Inf), title='Standardized Coefficient of LNNBELPOV', 
-          palette ='-RdBu')+
-  tm_layout(frame=FALSE, title = 'Number in Poverty (Log)')
-```
-
-```{r}
-# PCTBACHMOR
-coefPCTBACHMOR<-tm_shape(regress_data)+
-  tm_fill(col='coefPCTBACHMORst', breaks=c(-Inf, -6, -4, -2, 0, 2, 4, 6, Inf), title='Standardized Coefficient of PCTBACHMOR', 
-          palette='-RdBu')+
-  tm_layout(frame=FALSE, title = "Percent of Bachelor's or More")
-```
-
-```{r}
-# PCTSINGLES
-coefPCTSINGLES<-tm_shape(regress_data)+
-  tm_fill(col='coefPCTSINGLESst', breaks=c(-Inf, -6, -4, -2, 0, 2, 4, 6, Inf), title='Standardized Coefficient of PCTSINGLES', 
-          palette='-RdBu')+
-  tm_layout(frame=FALSE, title = 'Percent Single Detached Homes')
-```
-
-```{r}
-# PCTVACANT
-coefPCTVACANT<-tm_shape(regress_data)+
-  tm_fill(col='coefPCTVACANTst', breaks=c(-Inf, -6, -4, -2, 0, 2, 4, 6, Inf), title='Standardized Coefficient of PCTVACANT', 
-          palette='-RdBu')+
-  tm_layout(frame=FALSE, title = 'Percent of Vacancies')
-```
-
-```{r}
-# Combine maps
-tmap_arrange(coefLNNBELPOV, coefPCTBACHMOR, coefPCTSINGLES, coefPCTVACANT, ncol = 2, nrow = 2)
-```
-
-```{r}
 #The maps above are the ones using the exact code that our professor had but it looked funky so here is the code that I made to try and fix it.
 
 library(tmap)
