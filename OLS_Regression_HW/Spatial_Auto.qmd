@@ -392,6 +392,11 @@ lag_moran_mc <- moran.mc(lag_res, queenlist,999, alternative="two.sided")
 lag_moran_mc
 ```
 
+```{r}
+# Lag residual plot
+moran.plot(lag_res, queenlist)
+```
+
 ## 7. Regression Analysis: Spatial Error Regression
 
 To fit a Spatial Error Model, we use the errorsarlm function.
@@ -439,6 +444,11 @@ jarque.bera.test(error_reg$residuals)
 error_moran_mc<-moran.mc(error_res, queenlist, 999, alternative="two.sided")
 
 error_moran_mc
+```
+
+```{r}
+# Error residual plot
+moran.plot(error_res, queenlist)
 ```
 
 ## 8. Regression Analysis: Geographically Weighted Regression

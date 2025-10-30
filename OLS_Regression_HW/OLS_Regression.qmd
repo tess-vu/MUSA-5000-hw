@@ -398,7 +398,7 @@ Other regression assumptions will be examined in a separate section below in "Re
 
 ```{r}
 #| echo: false
-shapefile <- st_read("Lecture_1_RegressionData.shp/RegressionData.shp")
+shapefile <- st_read("data/RegressionData.shp")
 
 choropleth_LNMEDHVAL <- ggplot() +
   geom_sf(data = shapefile, aes(fill = LNMEDHVAL), color = "cornsilk2", linewidth = 0.25) +
@@ -661,6 +661,8 @@ hist_residuals <- ggplot(predicted_residual_data, aes(x = R_STANDARD)) +
   theme_minimal()
 
 hist_residuals
+
+#ggsave("HW2_Plots/OLS Residuals Histogram.png", plot = hist_residuals, width = 6, height = 4, units = "in", dpi = 300)
 ```
 
 ### Standardized Residual by Predicted Value Scatter Plot
@@ -676,9 +678,11 @@ predicted_residual_plot <- ggplot(predicted_residual_data, aes(x = R_PREDICTED, 
   labs(title = "Predicted Values vs. Standardized Residuals", 
        x = "Predicted Values", 
        y = "Standardized Residuals") +
-  theme_gray()
+  theme_minimal()
 
 predicted_residual_plot
+
+#ggsave("HW2_Plots/OLS Residuals Scatter Plot.png", plot = predicted_residual_plot, width = 6, height = 4, units = "in", dpi = 300)
 ```
 
 -   **INSTRUCTIONS:** Referencing the maps of the dependent variable and the predictors that you presented earlier, state whether there seems to be spatial autocorrelation in your variables. That is, does it seem that the observations (i.e., block groups) are independent of each other? Briefly discuss.
