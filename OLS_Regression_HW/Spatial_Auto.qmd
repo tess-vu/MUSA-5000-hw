@@ -474,7 +474,6 @@ adapt: TRUE returns a proportion between 0 and 1 of the observations to include 
 Let’s start with adaptive bandwidth, which varies the distance, but fixes the number of neighbors for each observation. Given that we specified a preference for an adaptive bandwidth optimized based on AICc, the output (despite its labels) is not a distance, but rather, the proportion of observations to be included for each location in the GWR Model. Here, it is recommended that 0.007862703 (or \~0.786%) of the observations be used for each location - the bandwidth should be adapted to capture about 13 observations (0.00786\*1720) for each location. You might think this is too few observations to be fitted for each local regression - in this case, the printed AICc measures can serve as a guidance for the proportion you may input in the GWR Model later on. Keep in mind that finding the optimal value of bandwidth takes a while, so be patient while the code runs.
 
 ```{r}
-
 # convert regress_data from df to spatial data
 regress_spatial <- as(regress_data, 'Spatial')  #These analyses are easier to do when the data are of the SpatialPolygonsDataFrame class
 class (regress_spatial)
@@ -739,11 +738,11 @@ coefPCTVACANT
 ```
 
 ```{r}
-arranged_coef <- tmap_arrange(coefLNNBELPOV, coefPCTBACHMOR, coefPCTSINGLES, coefPCTVACANT, ncol = 2, nrow = 2)
+arranged_coef <- tmap_arrange(coefLNNBELPOV, coefPCTBACHMOR, coefPCTSINGLES, coefPCTVACANT, ncol = 4)
 
 arranged_coef
 
-#tmap_save(arranged_coef, filename = "HW2_Plots/arranged_coef_Map.png", width = 8, height = 8, dpi = 300)
+tmap_save(arranged_coef, filename = "HW2_Plots/arranged_coef_Map_columns.png", width = 8, height = 8, dpi = 300)
 ```
 
 And we can also look at the spatial distribution of the local R-squares. We can see that the two predictors do a good job explaining the variance in our dependent variable in NW Philadelphia, but not in many other parts of the city.
