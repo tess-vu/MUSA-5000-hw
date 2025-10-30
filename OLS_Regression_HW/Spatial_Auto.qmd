@@ -261,17 +261,21 @@ Spatially speaking, the variance of the errors not being constant across all obs
 bptest(ols_reg)
 ```
 
-**Studentized Breusch-Pagan Test Interpretation:** Like the previous test, it observes for any heteroscedasticity, the only difference being that the original assumes normal distribution off the OLS residual values. However, the Studentized version is less stringent as it assumes non-normal distribution and adjusts for variance, this makes it better to use when certain data is known to be highly skewed, like this paper's analysis of median income with housing prices and vacancies in Philadelphia. Again, with this output, the CP is 20.892 with a very small p-value, meaning reject the null hypothesis, and the data is heteroscedastic.
+**Studentized Breusch-Pagan Test Interpretation:** Like the previous test, it observes for any heteroscedasticity, the only difference being that the original assumes normality, whereas this modification doesn't. The Studentized version is less stringent and adjusts for variance, this makes it better to use when certain data is known to be highly skewed, like this paper's analysis of median income with housing prices and vacancies in Philadelphia. Again, with this output, the CP is 20.892 with a very small p-value, meaning reject the null hypothesis, and the data is heteroscedastic.
 
 ```{r}
 #Prints the results of the White Test to assess whether heteroscedasticity is present (package: whitestrap)
 white_test(ols_reg)   
 ```
 
+**White's Test Interpretation:** This homoscedasticity test's main differentiator from Breusch-Pagan is that it can test for non-linear heteroscedasticity. While this is a very robust test, it doesn't have as strong influence when sample sizes are small.
+
 ```{r}
 # Prints the results of the Jarque-Bera Test to assess whether residuals are normal (package: tseries)
 jarque.bera.test(ols_reg$residuals)
 ```
+
+**Jarque Bera Test Interpretation:** 
 
 Now, let’s generate standardized residuals, which are OLS Model residuals divided by an estimate of their standard deviation, and map them. Visually, it certainly seems that there’s spatial autocorrelation in the residuals, with some higher values clustered in the northeast and northwest of the city, and some lower values clustered in north Philadelphia and downtown. However, a visual assessment is not sufficient, and we will test the presence of spatial autocorrelation in two ways: 1) by regressing residuals on their queen neighbors, and 2) by looking at the Moran’s I of the residuals.
 
