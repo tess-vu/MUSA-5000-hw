@@ -248,6 +248,28 @@ The F-statistic value of 677.3 indicates high statistical significance, meaning 
 The residual standard error 0.3676 indicates that the model is, on average, off on its predictions by 0.3676.
 
 ```{r}
+# OLS Residual vs. WT Residual
+
+regress_data$OLS_RESIDU <- residuals(ols_reg)
+
+regress_data$WT_RESIDU <- lag.listw(queenlist, regress_data$OLS_RESIDU)
+
+moran_RESIDU <- moran.plot(regress_data$OLS_RESIDU, queenlist)
+```
+
+```{r}
+#png("OLS_RESIDU_Plot.png", width = 8, height = 6, units = "in", res = 150)
+#moran.plot(regress_data$OLS_RESIDU, queenlist)
+#dev.off()
+```
+
+```{r}
+names(moran_RESIDU)
+
+summary(lm(moran_RESIDU$wx ~ moran_RESIDU$x))
+```
+
+```{r}
 #Prints the log likelihood
 logLik(ols_reg)  
 ```
