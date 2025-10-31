@@ -254,7 +254,11 @@ regress_data$OLS_RESIDU <- residuals(ols_reg)
 
 regress_data$WT_RESIDU <- lag.listw(queenlist, regress_data$OLS_RESIDU)
 
-moran_RESIDU <- moran.plot(regress_data$OLS_RESIDU, queenlist)
+moran_RESIDU <- moran.plot(regress_data$WT_RESIDU, queenlist)
+```
+
+```{r}
+plot(regress_data$WT_RESIDU, regress_data$OLS_RESIDU)
 ```
 
 ```{r}
@@ -475,10 +479,10 @@ moran.plot(error_res, queenlist)
 
 ```{r}
 data.frame(
-  Model = c("Spatial Lag", "Spatial Error"),
-  LogLik = c(logLik(lag_reg), logLik(error_reg)),
-  AIC = c(AIC(lag_reg), AIC(error_reg)),
-  SC = c(BIC(lag_reg), BIC(error_reg))
+  Model = c("OLS", "Spatial Lag", "Spatial Error"),
+  LogLik = c(logLik(ols_reg), logLik(lag_reg), logLik(error_reg)),
+  AIC = c(AIC(ols_reg), AIC(lag_reg), AIC(error_reg)),
+  SC = c(BIC(ols_reg), BIC(lag_reg), BIC(error_reg))
 )
 ```
 
