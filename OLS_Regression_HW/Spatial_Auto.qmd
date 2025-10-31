@@ -270,7 +270,7 @@ plot(regress_data$WT_RESIDU, regress_data$OLS_RESIDU)
 ```{r}
 names(moran_RESIDU)
 
-summary(lm(moran_RESIDU$wx ~ moran_RESIDU$x))
+summary(lm(moran_RESIDU$x ~ moran_RESIDU$wx))
 ```
 
 ```{r}
