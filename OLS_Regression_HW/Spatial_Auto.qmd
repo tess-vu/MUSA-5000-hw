@@ -657,14 +657,17 @@ coefLNNBELPOV <- tm_shape(regress_data) +
     col = "coefLNNBELPOVst",
     breaks = c(-Inf, -6, -4, -2, 0, 2, 4, 6, Inf),
     title = "Standardized Coef: LNNBELPOV",
-    palette = "-RdBu"
+    palette = "-RdBu",
+    border.col = NA,
+    border.alpha = 0
   ) +
-  tm_borders(col = "gray", lwd = 0.5) +
+  tm_borders(col = NA, lwd = 0) +
   tm_layout(
     frame = FALSE,
-    #title = "Percent of Number in Poverty (Log)",
-    title.position = c("center", "top"),
-    title.size = 1.2,
+    title = "Percent of Number in Poverty (Log)",
+    title.position = c(0.25, 1),
+    title.size = 0.8,
+    legend.show = FALSE,
     legend.position = c("RIGHT", "BOTTOM"),
     legend.just = c("right", "bottom"),
     legend.bg.color = "white",
@@ -686,14 +689,17 @@ coefPCTBACHMOR <- tm_shape(regress_data) +
     col = "coefPCTBACHMORst",
     breaks = c(-Inf, -6, -4, -2, 0, 2, 4, 6, Inf),
     title = "Standardized Coef: PCTBACHMOR",
-    palette = "-RdBu"
+    palette = "-RdBu",
+    border.col = NA,
+    border.alpha = 0
   ) +
-  tm_borders(col = "gray", lwd = 0.5) +
+  tm_borders(col = NA, lwd = 0) +
   tm_layout(
     frame = FALSE,
-    #title = "Percent of Bachelor's or More",
-    title.position = c("center", "top"),
-    title.size = 1.2,
+    title = "Percent of Bachelor's or More",
+    title.position = c(0.25, 1),
+    title.size = 0.8,
+    legend.show = FALSE,
     legend.position = c("RIGHT", "BOTTOM"),
     legend.just = c("right", "bottom"),
     legend.bg.color = "white",
@@ -714,14 +720,17 @@ coefPCTSINGLES <- tm_shape(regress_data) +
     col = "coefPCTSINGLESst",
     breaks = c(-Inf, -6, -4, -2, 0, 2, 4, 6, Inf),
     title = "Standardized Coef: PCTSINGLES",
-    palette = "-RdBu"
+    palette = "-RdBu",
+    border.col = NA,
+    border.alpha = 0
   ) +
-  tm_borders(col = "gray", lwd = 0.5) +
+  tm_borders(col = NA, lwd = 0) +
   tm_layout(
     frame = FALSE,
-    #title = "Percent of Detached Single Homes",
-    title.position = c("center", "top"),
-    title.size = 1.2,
+    title = "Percent of Detached Single Homes",
+    title.position = c(0.25, 1),
+    title.size = 0.8,
+    legend.show = FALSE,
     legend.position = c("RIGHT", "BOTTOM"),
     legend.just = c("right", "bottom"),
     legend.bg.color = "white",
@@ -742,15 +751,17 @@ coefPCTVACANT <- tm_shape(regress_data) +
   tm_fill(
     col = "coefPCTVACANTst",
     breaks = c(-Inf, -6, -4, -2, 0, 2, 4, 6, Inf),
-    title = "Standardized Coef: PCTVACANT",
-    palette = "-RdBu"
+    title = "Standardized Coefficients",
+    palette = "-RdBu",
+    border.col = NA,
+    border.alpha = 0
   ) +
-  tm_borders(col = "gray", lwd = 0.5) +
+  tm_borders(col = NA, lwd = 0) +
   tm_layout(
     frame = FALSE,
-    #title = "Percent of Vacancies",
-    title.position = c("center", "top"),
-    title.size = 1.2,
+    title = "Percent of Vacancies",
+    title.position = c(0.25, 1),
+    title.size = 0.8,
     legend.position = c("RIGHT", "BOTTOM"),
     legend.just = c("right", "bottom"),
     legend.bg.color = "white",
@@ -766,11 +777,11 @@ coefPCTVACANT
 ```
 
 ```{r}
-arranged_coef <- tmap_arrange(coefLNNBELPOV, coefPCTBACHMOR, coefPCTSINGLES, coefPCTVACANT, ncol = 4)
+arranged_coef <- tmap_arrange(coefLNNBELPOV, coefPCTBACHMOR, coefPCTSINGLES, coefPCTVACANT, nrow = 2, ncol = 2)
 
 arranged_coef
 
-tmap_save(arranged_coef, filename = "HW2_Plots/arranged_coef_Map_columns.png", width = 8, height = 8, dpi = 300)
+#tmap_save(arranged_coef, filename = "HW2_Plots/arranged_coef_map_rows.png", width = 8, height = 8, dpi = 300)
 ```
 
 And we can also look at the spatial distribution of the local R-squares. We can see that the two predictors do a good job explaining the variance in our dependent variable in NW Philadelphia, but not in many other parts of the city.
@@ -781,6 +792,8 @@ map <- tm_shape(regress_data)+
           breaks=c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7), 
           n=5, 
           palette = 'Blues',
+          #border.col = NA,
+          #border.alpha = 0,
           title = expression(Local~R^2)) +  # Add custom legend title
   tm_borders(col = "white", lwd = 0.5) +
   tm_layout(frame=FALSE)
@@ -790,7 +803,7 @@ map
 
 ```{r}
 # Save it
-#tmap_save(map, filename = "HW2_Plots/LocalR2_Map.png", width = 8, height = 8, dpi = 300)
+tmap_save(map, filename = "HW2_Plots/LocalR2_Map.png", width = 8, height = 8, dpi = 300)
 ```
 
 Finally, we can also look at the spatial autocorrelation in GWR residuals. This exercise is left for the student (spoiler alert: there’s much less autocorrelation in GWR residuals than in OLS residuals). Note that the residuals are extracted above using the command shp$gwrE<-gwrresults$gwr.e.
