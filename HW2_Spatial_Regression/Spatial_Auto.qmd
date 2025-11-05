@@ -7,9 +7,6 @@ editor: visual
 # **1. Spatial Lag and Spatial Error Regression**
 
 ```{r}
-#| eval: false
-#| echo: true
-
 library(sf)
 library(dplyr)
 library(tibble)
@@ -252,9 +249,9 @@ The residual standard error 0.3676 indicates that the model is, on average, off 
 
 regress_data$OLS_RESIDU <- residuals(ols_reg)
 
-regress_data$WT_RESIDU <- lag.listw(queenlist, regress_data$OLS_RESIDU)
+regress_data$OLS_RESIDU <- lag.listw(queenlist, regress_data$OLS_RESIDU)
 
-moran_RESIDU <- moran.plot(regress_data$WT_RESIDU, queenlist)
+moran_RESIDU <- moran.plot(regress_data$OLS_RESIDU, queenlist)
 ```
 
 ```{r}
